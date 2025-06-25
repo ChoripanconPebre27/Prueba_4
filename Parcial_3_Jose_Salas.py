@@ -39,15 +39,14 @@
 
 los_fortificados = {
     "Concepción": {"nombres": [], "codigo": [], "entradas": 500},
-    "Puente Alto": {"nombres": [], "entradas_pedidas": [], "entradas": 1300},
+    "Puente Alto": {"nombres": [], "codigo": [], "uso": 0, "prohibido": [], "entradas": 1300},
     "Muelle Barón Valparaíso": {"nombres": [], "codigo": [], "tipo_entrada": [], "entradas": 100},
     "Muelle Vergara Viña del Mar": {"nombres": [], "tipo_entrada": [], "entradas": 100}
 }
-uso = 0
-prohibido = []
+
 # Función del Menú
 
-def menu(dict, uso):
+def menu(dict):
     while True:
         print("TOTEM AUTOSERVICIO GIRA ROCK AND CHILE IN CHILE")
         print("\t1.- Comprar entrada a “los Fortificados” en Concepción.")
@@ -60,7 +59,7 @@ def menu(dict, uso):
         if elegir == 1:
             comprar_conce(dict)
         elif elegir == 2:
-            comprar_pa(dict, uso)
+            comprar_pa(dict)
         elif elegir == 3:
             comprar_valpo(dict)
         elif elegir == 4:
@@ -128,7 +127,7 @@ def comprar_conce(dict):
         print(f"¡Entrada registrada! Stock restante: {dict["Concepción"]["entradas"]}")
         return
 
-def comprar_pa(dict, uso):
+def comprar_pa(dict):
     if dict["Puente Alto"]["entradas"] < 0:
         print("Error: Entradas agotadas.")
         return
@@ -145,20 +144,26 @@ def comprar_pa(dict, uso):
         valido = "valido"
     codigo_confirm = input("Código de confirmación: ")
     validar = try_except2(codigo_confirm)
-    if codigo_confirm in prohibido:
+    if codigo_confirm in dict["Puente Alto"]["prohibido"]:
         print("Error: Ya no se puede utilizar este código.")
         return
     if valido == "valido" and validar == "validado":
+        if len(dict["Puente Alto"]["codigo"]) == 0:
+            dict["Puente Alto"]["codigo"].append(codigo_confirm)
+        if codigo_confirm in dict["Puente Alto"]["codigo"]:
+            dict["Puente Alto"]["uso"] += 1
+            if dict["Puente Alto"]["uso"] == 3:
+                dict["Puente Alto"]["prohibido"].append(codigo_confirm)
+                dict["Puente Alto"]["uso"] = 0
+        else:
+            dict["Puente Alto"]["codigo"].append(codigo_confirm)
+            uso = 0
         entradas = try_except(input("Cantidad de entradas (máx 3): "))
         if entradas < 1 and entradas > 3:
             print("Error: solo se permiten entre 1 y 3 entradas por persona")
             return
         dict["Puente Alto"]["nombres"].append(name_comprador)
         dict["Puente Alto"]["entradas"] -= entradas
-        uso += 1
-        if uso == 3:
-            prohibido.append(codigo_confirm)
-            uso = 0
         print(f"¡Entradas registradas! Stock restante: {dict["Puente Alto"]["entradas"]}")
         return
 
@@ -220,4 +225,4 @@ def salir():
 
 # Desarrollo
 
-menu(los_fortificados, uso)
+menu(los_fortificados)
